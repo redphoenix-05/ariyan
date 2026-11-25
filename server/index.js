@@ -21,12 +21,21 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+const Profile = require('./models/Profile');
+const Education = require('./models/Education');
+const Experience = require('./models/Experience');
+const Project = require('./models/Project');
+const Certificate = require('./models/Certificate');
+
 let dbConnection;
 
 function connectDB() {
   if (mongoose.connection.readyState >= 1) return Promise.resolve();
 
-  dbConnection ||= mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio')
+  dbConnection ||= mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio', {
+    maxPoolSize: 5,
+    serverSelectionTimeoutMS: 5000,
+  })
     .then(() => console.log('MongoDB connected'))
     .catch(err => {
       dbConnection = null;
@@ -46,6 +55,24 @@ app.use('/api', async (req, res, next) => {
     next();
   } catch (err) {
     next(err);
+  }
+});
+
+// Combined public portfolio endpoint (1 request + Vercel Edge CDN caching)
+app.get('/api/portfolio', async (req, res) => {
+  try {
+    const [profileDoc, education, experience, projects, certificates] = await Promise.all([
+      Profile.findOne().lean(),
+      Education.find().sort({ order: 1, startYear: -1 }).lean(),
+      Experience.find().sort({ order: 1, startDate: -1 }),
+      Project.find().sort({ order: 1, createdAt: -1 }).lean(),
+      Certificate.find().sort({ order: 1, createdAt: -1 }).lean(),
+    ]);
+    const profile = profileDoc || (await Profile.create({})).toObject();
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.json({ profile, education, experience, projects, certificates });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

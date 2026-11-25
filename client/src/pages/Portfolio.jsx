@@ -1688,12 +1688,24 @@ function Footer({ profile }) {
 }
 
 // ─── Main Portfolio ──────────────────────────────────────────────────────────
+const CACHE_KEY = 'portfolio_cache_v1';
+
+function readCachedPortfolio() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function Portfolio() {
-  const [profile, setProfile] = useState(null);
-  const [education, setEducation] = useState([]);
-  const [experience, setExperience] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [certificates, setCertificates] = useState([]);
+  const cached = readCachedPortfolio();
+  const [profile, setProfile] = useState(() => cached?.profile || null);
+  const [education, setEducation] = useState(() => cached?.education || []);
+  const [experience, setExperience] = useState(() => cached?.experience || []);
+  const [projects, setProjects] = useState(() => cached?.projects || []);
+  const [certificates, setCertificates] = useState(() => cached?.certificates || []);
   const [activeSection, setActiveSection] = useState('home');
   const [theme, setTheme] = useState(() => localStorage.getItem('portfolio_theme') || 'dark');
 
@@ -1703,18 +1715,18 @@ export default function Portfolio() {
   }, [theme]);
 
   useEffect(() => {
-    Promise.all([
-      api.get('/profile'),
-      api.get('/education'),
-      api.get('/experience'),
-      api.get('/projects'),
-      api.get('/certificates'),
-    ]).then(([p, e, ex, pr, ce]) => {
-      setProfile(p.data);
-      setEducation(e.data);
-      setExperience(ex.data);
-      setProjects(pr.data);
-      setCertificates(ce.data);
+    api.get('/portfolio').then(res => {
+      const data = res.data || {};
+      setProfile(data.profile || null);
+      setEducation(data.education || []);
+      setExperience(data.experience || []);
+      setProjects(data.projects || []);
+      setCertificates(data.certificates || []);
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch {
+        // Ignore storage quota errors
+      }
     }).catch(() => {});
   }, []);
 
