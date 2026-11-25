@@ -79,7 +79,7 @@ npm run build
 ## Project Structure
 
 ```text
-ArSPortfolio/
+ariyan/
 ├── api/                 # Vercel serverless entry point
 ├── client/              # React + Vite frontend
 │   ├── public/          # Static assets, SEO files, certificate images
