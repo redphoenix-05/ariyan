@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import {
-  User, GraduationCap, Briefcase, FolderGit2, Award, Lock,
+  User, GraduationCap, Briefcase, FolderGit2, Award, Lock, Mail, Check,
   LogOut, Upload, Plus, Pencil, Trash2, Save, X, ChevronRight, ExternalLink, Eye
 } from 'lucide-react';
 
@@ -816,6 +816,114 @@ function CertificatesTab({ toast }) {
   );
 }
 
+// ─── Messages Tab ─────────────────────────────────────────────────────────────
+function MessagesTab({ toast, onUnreadChange }) {
+  const [items, setItems] = useState([]);
+
+  const load = () => {
+    api.get('/messages').then(r => {
+      setItems(r.data);
+      onUnreadChange?.(r.data.filter(m => !m.read).length);
+    });
+  };
+  useEffect(() => { load(); }, []);
+
+  const toggleRead = async (msg) => {
+    try {
+      await api.put(`/messages/${msg._id}/read`, { read: !msg.read });
+      load();
+    } catch {
+      toast('Failed to update message', 'error');
+    }
+  };
+
+  const del = async (id) => {
+    if (!confirm('Delete this message?')) return;
+    try {
+      await api.delete(`/messages/${id}`);
+      toast('Message deleted');
+      load();
+    } catch {
+      toast('Failed to delete message', 'error');
+    }
+  };
+
+  const unread = items.filter(m => !m.read).length;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+          {items.length} message{items.length !== 1 ? 's' : ''} {unread > 0 ? `· ${unread} unread` : ''}
+        </span>
+      </div>
+
+      {!items.length ? (
+        <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+          No messages yet. Visitors who submit your Contact form will appear here.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+          {items.map(msg => (
+            <div
+              key={msg._id}
+              style={{
+                padding: '1.25rem 1.4rem',
+                background: 'var(--surface)',
+                border: `1px solid ${msg.read ? 'var(--border)' : 'var(--accent-border)'}`,
+                borderRadius: 'var(--radius)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.98rem' }}>{msg.subject}</span>
+                    {!msg.read && (
+                      <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--accent)', background: 'var(--accent-soft)', border: '1px solid var(--accent-border)', padding: '0.1rem 0.5rem', borderRadius: '999px' }}>
+                        NEW
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    <strong style={{ color: 'var(--text)' }}>{msg.name}</strong> ·{' '}
+                    <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`} style={{ color: 'var(--accent)' }}>
+                      {msg.email}
+                    </a>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginRight: '0.35rem' }}>
+                    {new Date(msg.createdAt).toLocaleString()}
+                  </span>
+                  <button
+                    onClick={() => toggleRead(msg)}
+                    title={msg.read ? 'Mark as unread' : 'Mark as read'}
+                    style={{ padding: '0.45rem 0.65rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px', color: msg.read ? 'var(--text-dim)' : 'var(--emerald)', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                  >
+                    <Check size={13} /> {msg.read ? 'Read' : 'Mark Read'}
+                  </button>
+                  <button
+                    onClick={() => del(msg._id)}
+                    title="Delete message"
+                    style={{ padding: '0.45rem', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: '#f87171' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.7, whiteSpace: 'pre-wrap', paddingTop: '0.6rem', borderTop: '1px solid var(--border)' }}>
+                {msg.message}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 const TABS = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -823,6 +931,7 @@ const TABS = [
   { id: 'experience', label: 'Experience', icon: Briefcase },
   { id: 'projects', label: 'Projects', icon: FolderGit2 },
   { id: 'certificates', label: 'Certificates', icon: Award },
+  { id: 'messages', label: 'Messages', icon: Mail },
 ];
 
 export default function AdminDashboard() {
@@ -830,6 +939,13 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('profile');
   const [toast, setToast] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    api.get('/messages').then(r => {
+      setUnreadCount((r.data || []).filter(m => !m.read).length);
+    }).catch(() => {});
+  }, []);
 
   const showToast = (msg, type = 'success') => setToast({ msg, type });
 
@@ -870,7 +986,12 @@ export default function AdminDashboard() {
               }}>
                 <Icon size={16} />
                 {t.label}
-                {active && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
+                {t.id === 'messages' && unreadCount > 0 && (
+                  <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', background: 'var(--accent)', color: 'var(--bg)', padding: '0.05rem 0.45rem', borderRadius: '999px', fontWeight: 700 }}>
+                    {unreadCount}
+                  </span>
+                )}
+                {active && !(t.id === 'messages' && unreadCount > 0) && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
               </button>
             );
           })}
@@ -906,6 +1027,7 @@ export default function AdminDashboard() {
           {tab === 'experience' && <ExperienceTab toast={showToast} />}
           {tab === 'projects' && <ProjectsTab toast={showToast} />}
           {tab === 'certificates' && <CertificatesTab toast={showToast} />}
+          {tab === 'messages' && <MessagesTab toast={showToast} onUnreadChange={setUnreadCount} />}
         </div>
       </div>
 

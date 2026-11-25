@@ -83,6 +83,7 @@ app.use('/api/education', require('./routes/education'));
 app.use('/api/experience', require('./routes/experience'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/certificates', require('./routes/certificates'));
+app.use('/api/messages', require('./routes/messages'));
 
 const PORT = process.env.PORT || 5000;
 

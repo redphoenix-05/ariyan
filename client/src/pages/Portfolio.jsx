@@ -1490,16 +1490,22 @@ function EducationSection({ items }) {
 // ─── 8. Contact Section (2-Column Split) ─────────────────────────────────────
 function ContactSection({ profile }) {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
-  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState(null); // { type: 'success' | 'error', text: string }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const to = profile?.email || 'ariyanspandan@gmail.com';
-    const subject = encodeURIComponent(form.subject || `Portfolio Inquiry from ${form.name}`);
-    const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`);
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setSending(true);
+    setStatus(null);
+    try {
+      await api.post('/messages', form);
+      setForm({ name: '', email: '', subject: '', message: '' });
+      setStatus({ type: 'success', text: "Message sent! I'll get back to you soon." });
+    } catch (err) {
+      setStatus({ type: 'error', text: err.response?.data?.message || 'Failed to send message. Please try again.' });
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -1533,10 +1539,14 @@ function ContactSection({ profile }) {
               <textarea id="c-message" rows={4} required className="admin-input" value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} placeholder="Tell me about what you're building..." style={{ resize: 'vertical' }} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <button type="submit" className="btn-primary">
-                <Send size={15} /> Send Message
+              <button type="submit" className="btn-primary" disabled={sending}>
+                <Send size={15} /> {sending ? 'Sending...' : 'Send Message'}
               </button>
-              {sent && <span style={{ fontSize: '0.84rem', color: 'var(--emerald)' }}>Opening your email client...</span>}
+              {status && (
+                <span style={{ fontSize: '0.84rem', color: status.type === 'error' ? '#f87171' : 'var(--emerald)' }}>
+                  {status.text}
+                </span>
+              )}
             </div>
             </form>
           </Reveal>
