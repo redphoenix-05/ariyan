@@ -1194,7 +1194,7 @@ export default function AdminDashboard() {
 
       {/* Main content */}
       <div className="admin-main" style={{ flex: 1, marginLeft: '240px', padding: '2rem', overflowY: 'auto' }}>
-        <div style={{ maxWidth: '900px' }}>
+        <div style={{ maxWidth: '900px', width: '100%', margin: '0 auto' }}>
           {/* Header */}
           <div style={{ marginBottom: '2rem' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
