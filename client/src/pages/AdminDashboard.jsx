@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import {
-  User, GraduationCap, Briefcase, FolderGit2, Award, Lock, Mail, Check,
+  User, GraduationCap, Briefcase, FolderGit2, Award, Lock, Mail, Check, Menu,
   LogOut, Upload, Plus, Pencil, Trash2, Save, X, ChevronRight, ExternalLink, Eye
 } from 'lucide-react';
 
@@ -940,6 +941,7 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState('profile');
   const [toast, setToast] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     api.get('/messages').then(r => {
@@ -947,9 +949,15 @@ export default function AdminDashboard() {
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
+
   const showToast = (msg, type = 'success') => setToast({ msg, type });
 
   const handleLogout = () => { logout(); navigate('/admin'); };
+  const activeTabLabel = TABS.find(t => t.id === tab)?.label || 'Admin';
 
   return (
     <>
@@ -958,7 +966,183 @@ export default function AdminDashboard() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="admin-shell" style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', fontFamily: 'var(--font-body)' }}>
-      {/* Sidebar */}
+      {/* Mobile Header with Side Drawer Toggle */}
+      <header
+        className="admin-mobile-header"
+        style={{
+          position: 'sticky',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          background: 'var(--nav-bg)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border)',
+          padding: '0.85rem 1rem',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', lineHeight: 1.1 }}>
+            Portfolio <span style={{ color: 'var(--accent)' }}>Admin</span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: '0.15rem' }}>
+            {activeTabLabel} · @{admin?.username}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(o => !o)}
+          aria-label={drawerOpen ? 'Close admin menu' : 'Open admin menu'}
+          aria-expanded={drawerOpen}
+          style={{
+            position: 'relative',
+            width: '38px',
+            height: '38px',
+            borderRadius: '10px',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {drawerOpen ? <X size={18} /> : <Menu size={18} />}
+          {!drawerOpen && unreadCount > 0 && (
+            <span style={{ position: 'absolute', top: '-3px', right: '-3px', width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent)', border: '2px solid var(--bg)' }} />
+          )}
+        </button>
+      </header>
+
+      {/* Mobile Slide-Out Side Drawer */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            <motion.div
+              key="admin-drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setDrawerOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 140,
+                background: 'rgba(0, 0, 0, 0.6)',
+                backdropFilter: 'blur(4px)',
+              }}
+            />
+            <motion.aside
+              key="admin-drawer-panel"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              aria-label="Mobile Admin Navigation"
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: 'min(290px, 82vw)',
+                zIndex: 150,
+                background: 'var(--bg)',
+                borderLeft: '1px solid var(--border)',
+                padding: '1.25rem 1.25rem 1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '-12px 0 40px rgba(0, 0, 0, 0.45)',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem' }}>
+                      Portfolio <span style={{ color: 'var(--accent)' }}>Admin</span>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      @{admin?.username}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDrawerOpen(false)}
+                    aria-label="Close admin menu"
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
+                      color: 'var(--text)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {TABS.map((t, idx) => {
+                    const Icon = t.icon;
+                    const active = tab === t.id;
+                    return (
+                      <motion.button
+                        key={t.id}
+                        type="button"
+                        initial={{ opacity: 0, x: 18 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.04 * idx, duration: 0.22 }}
+                        onClick={() => { setTab(t.id); setDrawerOpen(false); }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.75rem 0.9rem',
+                          borderRadius: '10px',
+                          background: active ? 'var(--accent-soft)' : 'transparent',
+                          border: `1px solid ${active ? 'var(--accent-border)' : 'transparent'}`,
+                          color: active ? 'var(--accent)' : 'var(--text-muted)',
+                          fontSize: '0.92rem',
+                          fontWeight: active ? 600 : 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Icon size={16} />
+                        <span>{t.label}</span>
+                        {t.id === 'messages' && unreadCount > 0 && (
+                          <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', background: 'var(--accent)', color: 'var(--bg)', padding: '0.05rem 0.45rem', borderRadius: '999px', fontWeight: 700 }}>
+                            {unreadCount}
+                          </span>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <a href="/" target="_blank" rel="noopener noreferrer" onClick={() => setDrawerOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.8rem', fontSize: '0.84rem', color: 'var(--text-muted)', background: 'var(--surface-2)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  <Eye size={14} /> View Portfolio <ExternalLink size={11} style={{ marginLeft: 'auto' }} />
+                </a>
+                <button type="button" onClick={() => { setDrawerOpen(false); handleLogout(); }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 0.8rem', fontSize: '0.84rem', color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', cursor: 'pointer' }}>
+                  <LogOut size={14} /> Sign Out
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Sidebar */}
       <div className="admin-sidebar" style={{ width: '240px', background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 10 }}>
         {/* Logo */}
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
