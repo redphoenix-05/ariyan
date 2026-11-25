@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ExternalLink, Download, MapPin, ChevronDown, Mail, Sun, Moon,
   ChevronLeft, ChevronRight, Award, ArrowUp, Send, Maximize2, X,
-  GraduationCap, Calendar, Briefcase
+  GraduationCap, Calendar, Briefcase, Menu
 } from 'lucide-react';
 import api from '../utils/api';
 
@@ -94,9 +94,26 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'Contact' },
 ];
 
-// ─── Navbar ──────────────────────────────────────────────────────────────────
+// ─── Scroll Fly-Up Reveal Wrapper ────────────────────────────────────────────
+function Reveal({ children, delay = 0, y = 36, className, style }) {
+  return (
+    <motion.div
+      className={className}
+      style={style}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Navbar (Desktop Top Bar + Mobile Slide-Out Side Drawer) ─────────────────
 function Navbar({ profile, activeSection, theme, toggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -104,96 +121,237 @@ function Navbar({ profile, activeSection, theme, toggleTheme }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
+
   const brand = profile?.name?.split(' ')[0] || 'Ariyan';
 
   return (
-    <header
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        background: scrolled ? 'var(--nav-bg)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(16px)' : 'none',
-        borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
-        transition: 'background-color 0.25s ease, border-color 0.25s ease',
-      }}
-    >
-      <div
-        className="container portfolio-nav-inner"
+    <>
+      <header
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingTop: '1rem',
-          paddingBottom: '1rem',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          background: scrolled || drawerOpen ? 'var(--nav-bg)' : 'transparent',
+          backdropFilter: scrolled || drawerOpen ? 'blur(16px)' : 'none',
+          borderBottom: scrolled || drawerOpen ? '1px solid var(--border)' : '1px solid transparent',
+          transition: 'background-color 0.25s ease, border-color 0.25s ease',
         }}
       >
-        <a
-          href="#home"
+        <div
+          className="container portfolio-nav-inner"
           style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            fontSize: '1.2rem',
-            letterSpacing: '-0.03em',
-          }}
-        >
-          {brand}
-        </a>
-
-        <nav
-          className="portfolio-nav-links"
-          aria-label="Primary Navigation"
-          style={{ display: 'flex', alignItems: 'center', gap: '1.65rem', fontSize: '0.875rem' }}
-        >
-          {NAV_ITEMS.map(item => {
-            const isActive = activeSection === item.id;
-            return (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                style={{
-                  color: isActive ? 'var(--text)' : 'var(--text-muted)',
-                  fontWeight: isActive ? 600 : 400,
-                  whiteSpace: 'nowrap',
-                  transition: 'color 0.2s ease',
-                }}
-              >
-                {item.label}
-              </a>
-            );
-          })}
-        </nav>
-
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            border: '1px solid var(--border)',
-            background: 'var(--surface)',
-            color: 'var(--text-muted)',
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'border-color 0.2s ease, color 0.2s ease',
+            justifyContent: 'space-between',
+            paddingTop: '1rem',
+            paddingBottom: '1rem',
           }}
         >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-      </div>
-    </header>
+          <a
+            href="#home"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 800,
+              fontSize: '1.2rem',
+              letterSpacing: '-0.03em',
+            }}
+          >
+            {brand}
+          </a>
+
+          <nav
+            className="portfolio-nav-links desktop-only-nav"
+            aria-label="Primary Navigation"
+            style={{ display: 'flex', alignItems: 'center', gap: '1.65rem', fontSize: '0.875rem' }}
+          >
+            {NAV_ITEMS.map(item => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  style={{
+                    color: isActive ? 'var(--text)' : 'var(--text-muted)',
+                    fontWeight: isActive ? 600 : 400,
+                    whiteSpace: 'nowrap',
+                    transition: 'color 0.2s ease',
+                  }}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
+          </nav>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text-muted)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'border-color 0.2s ease, color 0.2s ease',
+              }}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <button
+              type="button"
+              className="mobile-menu-btn"
+              onClick={() => setDrawerOpen(o => !o)}
+              aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={drawerOpen}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {drawerOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Slide-Out Side Drawer */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            <motion.div
+              key="drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setDrawerOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 140,
+                background: 'rgba(0, 0, 0, 0.6)',
+                backdropFilter: 'blur(4px)',
+              }}
+            />
+            <motion.aside
+              key="drawer-panel"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              aria-label="Mobile Side Navigation"
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: 'min(290px, 82vw)',
+                zIndex: 150,
+                background: 'var(--bg)',
+                borderLeft: '1px solid var(--border)',
+                padding: '1.25rem 1.5rem 2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '-12px 0 40px rgba(0, 0, 0, 0.45)',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem' }}>{brand}</span>
+                  <button
+                    type="button"
+                    onClick={() => setDrawerOpen(false)}
+                    aria-label="Close navigation menu"
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
+                      color: 'var(--text)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {NAV_ITEMS.map((item, idx) => {
+                    const isActive = activeSection === item.id;
+                    return (
+                      <motion.a
+                        key={item.id}
+                        href={`#${item.id}`}
+                        initial={{ opacity: 0, x: 18 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.04 * idx, duration: 0.25 }}
+                        onClick={() => setDrawerOpen(false)}
+                        style={{
+                          padding: '0.75rem 0.9rem',
+                          borderRadius: '10px',
+                          fontSize: '0.95rem',
+                          fontWeight: isActive ? 600 : 500,
+                          color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                          background: isActive ? 'var(--accent-soft)' : 'transparent',
+                          border: `1px solid ${isActive ? 'var(--accent-border)' : 'transparent'}`,
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {item.label}
+                      </motion.a>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <a href="#contact" onClick={() => setDrawerOpen(false)} className="btn-primary" style={{ width: '100%', padding: '0.65rem 1rem', fontSize: '0.85rem' }}>
+                    Let&apos;s Connect
+                  </a>
+                  {profile?.resumeUrl && (
+                    <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer" onClick={() => setDrawerOpen(false)} className="btn-ghost" style={{ width: '100%', padding: '0.65rem 1rem', fontSize: '0.85rem' }}>
+                      <Download size={14} /> Resume
+                    </a>
+                  )}
+                </div>
+                <SocialLinks profile={profile} size="sm" />
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
 // ─── Section Header ──────────────────────────────────────────────────────────
 function SectionHeader({ eyebrow, title, subtitle, align = 'center' }) {
   return (
-    <div style={{ marginBottom: '3.25rem', textAlign: align }}>
+    <Reveal y={28} style={{ marginBottom: '3.25rem', textAlign: align }}>
       <p
         style={{
           fontFamily: 'var(--font-mono)',
@@ -229,7 +387,7 @@ function SectionHeader({ eyebrow, title, subtitle, align = 'center' }) {
           {subtitle}
         </p>
       )}
-    </div>
+    </Reveal>
   );
 }
 
@@ -420,18 +578,26 @@ function Hero({ profile, apiBase }) {
           <SocialLinks profile={profile} />
         </div>
 
-        <a
+        <motion.a
           href="#about"
           aria-label="Scroll to About section"
+          className="scroll-float-btn"
+          animate={{ y: [0, 9, 0] }}
+          transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut' }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--text-dim)',
+            width: '40px',
+            height: '40px',
+            borderRadius: '999px',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--accent)',
           }}
         >
-          <ChevronDown size={20} />
-        </a>
+          <ChevronDown size={19} />
+        </motion.a>
       </div>
     </section>
   );
@@ -447,7 +613,7 @@ function AboutSection({ profile }) {
     <section id="about" className="section-block section-block-alt">
       <div className="container">
         <div className="about-grid" style={quickFacts.length === 0 ? { gridTemplateColumns: '1fr' } : undefined}>
-          <div>
+          <Reveal>
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
@@ -482,10 +648,10 @@ function AboutSection({ profile }) {
                 Add your bio or About Me text from the Admin Dashboard.
               </p>
             )}
-          </div>
+          </Reveal>
 
           {quickFacts.length > 0 && (
-            <div className="card" style={{ padding: '1.75rem' }}>
+            <Reveal delay={0.12} className="card" style={{ padding: '1.75rem' }}>
               <p
                 style={{
                   fontFamily: 'var(--font-mono)',
@@ -516,7 +682,7 @@ function AboutSection({ profile }) {
                   </div>
                 ))}
               </div>
-            </div>
+            </Reveal>
           )}
         </div>
       </div>
@@ -547,7 +713,7 @@ function SkillsSection({ skillCategories, skills }) {
             {groups.length > 0 && (
               <div className="skills-grid">
                 {groups.map((group, idx) => (
-                  <div key={group._id || `${group.title}-${idx}`} className="card" style={{ padding: '1.75rem' }}>
+                  <Reveal key={group._id || `${group.title}-${idx}`} delay={idx * 0.08} className="card" style={{ padding: '1.75rem' }}>
                     <h3 style={{ fontSize: '1.15rem', marginBottom: group.subtitle ? '0.35rem' : '1.1rem' }}>{group.title}</h3>
                     {group.subtitle && (
                       <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>{group.subtitle}</p>
@@ -573,13 +739,13 @@ function SkillsSection({ skillCategories, skills }) {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </Reveal>
                 ))}
               </div>
             )}
 
             {extra.length > 0 && (
-              <div style={{ marginTop: groups.length > 0 ? '2.5rem' : 0, textAlign: 'center' }}>
+              <Reveal delay={0.12} style={{ marginTop: groups.length > 0 ? '2.5rem' : 0, textAlign: 'center' }}>
                 {groups.length > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-dim)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1rem' }}>
                     Also familiar with
@@ -590,7 +756,7 @@ function SkillsSection({ skillCategories, skills }) {
                     <span key={s} className="tag">{s}</span>
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
           </>
         )}
@@ -621,8 +787,8 @@ function ExperienceSection({ items }) {
           </p>
         ) : (
           <div style={{ maxWidth: '860px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {items.map(exp => (
-              <div key={exp._id} className="card" style={{ padding: '1.75rem' }}>
+            {items.map((exp, idx) => (
+              <Reveal key={exp._id} delay={idx * 0.08} className="card" style={{ padding: '1.75rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div
@@ -690,7 +856,7 @@ function ExperienceSection({ items }) {
                     ))}
                   </div>
                 )}
-              </div>
+              </Reveal>
             ))}
           </div>
         )}
@@ -720,7 +886,7 @@ function ProjectsSection({ items, githubUrl }) {
         ) : (
           <>
             {featured && (
-              <div className="featured-project-card">
+              <Reveal className="featured-project-card">
                 <div style={{ minHeight: '260px', background: 'var(--bg-3)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {featured.thumbnail ? (
                     <img src={featured.thumbnail} alt={featured.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -757,13 +923,13 @@ function ProjectsSection({ items, githubUrl }) {
                     )}
                   </div>
                 </div>
-              </div>
+              </Reveal>
             )}
 
             {rest.length > 0 && (
               <div className="projects-grid">
-                {rest.map(proj => (
-                  <div key={proj._id} className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                {rest.map((proj, idx) => (
+                  <Reveal key={proj._id} delay={idx * 0.08} className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ height: '165px', background: 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
                       {proj.thumbnail ? (
                         <img src={proj.thumbnail} alt={proj.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -798,7 +964,7 @@ function ProjectsSection({ items, githubUrl }) {
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </Reveal>
                 ))}
               </div>
             )}
@@ -862,11 +1028,12 @@ function CertificatesSlider({ items, apiBase }) {
             No certificates added yet.
           </p>
         ) : (
-          <div
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-            style={{ maxWidth: '1020px', margin: '0 auto' }}
-          >
+          <Reveal>
+            <div
+              onMouseEnter={() => setPaused(true)}
+              onMouseLeave={() => setPaused(false)}
+              style={{ maxWidth: '1020px', margin: '0 auto' }}
+            >
             <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--radius-lg)' }}>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
@@ -1026,7 +1193,8 @@ function CertificatesSlider({ items, apiBase }) {
                 </button>
               </div>
             )}
-          </div>
+            </div>
+          </Reveal>
         )}
 
         {/* Full-screen Lightbox */}
@@ -1262,7 +1430,8 @@ function EducationSection({ items }) {
                     zIndex: 1,
                   }}
                 >
-                  <div
+                  <Reveal
+                    delay={i * 0.08}
                     className="card edu-card"
                     style={{
                       width: '100%',
@@ -1271,9 +1440,7 @@ function EducationSection({ items }) {
                       margin: isLeft ? '0 1.75rem 0 0' : '0 0 0 1.75rem',
                       borderColor: isActive ? 'rgba(99,179,237,0.38)' : 'var(--border)',
                       boxShadow: isActive ? '0 0 32px rgba(99,179,237,0.1)' : 'none',
-                      opacity: isActive ? 1 : 0.45,
-                      transform: isActive ? 'none' : 'scale(0.97)',
-                      transition: 'all 0.5s ease',
+                      transition: 'border-color 0.5s ease, box-shadow 0.5s ease',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
@@ -1309,7 +1476,7 @@ function EducationSection({ items }) {
                         {edu.description}
                       </p>
                     )}
-                  </div>
+                  </Reveal>
                 </div>
               );
             })}
@@ -1345,7 +1512,8 @@ function ContactSection({ profile }) {
         />
 
         <div className="contact-grid" style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <form onSubmit={handleSubmit} className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Reveal>
+            <form onSubmit={handleSubmit} className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
                 <label className="admin-label" htmlFor="c-name">Name</label>
@@ -1370,9 +1538,10 @@ function ContactSection({ profile }) {
               </button>
               {sent && <span style={{ fontSize: '0.84rem', color: 'var(--emerald)' }}>Opening your email client...</span>}
             </div>
-          </form>
+            </form>
+          </Reveal>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <Reveal delay={0.12} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="card" style={{ padding: '1.75rem' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '1rem' }}>
                 Get in Touch
@@ -1397,7 +1566,7 @@ function ContactSection({ profile }) {
               </p>
               <SocialLinks profile={profile} />
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

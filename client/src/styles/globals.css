@@ -362,7 +362,19 @@ input, textarea, select {
   }
 }
 
+.mobile-menu-btn {
+  display: none;
+}
+
 @media (max-width: 760px) {
+  .desktop-only-nav {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex !important;
+  }
+
   .section-block {
     padding: 4.25rem 0;
   }
@@ -373,19 +385,8 @@ input, textarea, select {
   }
 
   .portfolio-nav-inner {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.65rem;
-  }
-
-  .portfolio-nav-links {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
-    scrollbar-width: none;
-  }
-  .portfolio-nav-links::-webkit-scrollbar {
-    display: none;
   }
 
   .edu-spine {
@@ -402,8 +403,6 @@ input, textarea, select {
   .edu-card {
     max-width: none !important;
     margin: 0 !important;
-    opacity: 1 !important;
-    transform: none !important;
   }
 
   .cert-slide-card > div:last-child {
