@@ -95,15 +95,15 @@ const NAV_ITEMS = [
 ];
 
 // ─── Scroll Fly-Up Reveal Wrapper ────────────────────────────────────────────
-function Reveal({ children, delay = 0, y = 36, className, style }) {
+function Reveal({ children, delay = 0, y = 22, className, style }) {
   return (
     <motion.div
       className={className}
       style={style}
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, amount: 0.12 }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: false, amount: 0.01, margin: '0px 0px 40px 0px' }}
+      transition={{ duration: 0.28, delay: Math.min(delay, 0.08), ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -464,9 +464,9 @@ function Hero({ profile, apiBase }) {
       <div style={{ maxWidth: '760px', width: '100%', textAlign: 'center', margin: '0 auto' }}>
         {photoSrc && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
+            initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.25 }}
             style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.75rem' }}
           >
             <div
@@ -489,9 +489,9 @@ function Hero({ profile, apiBase }) {
         )}
 
         <motion.h1
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.05 }}
+          transition={{ duration: 0.28, delay: 0.02 }}
           style={{
             fontSize: 'clamp(2.6rem, 6.5vw, 4.5rem)',
             fontWeight: 800,
@@ -503,9 +503,9 @@ function Hero({ profile, apiBase }) {
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.12 }}
+          transition={{ duration: 0.28, delay: 0.05 }}
           style={{
             fontSize: 'clamp(1.1rem, 2.4vw, 1.4rem)',
             fontWeight: 600,
@@ -523,7 +523,7 @@ function Hero({ profile, apiBase }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.18 }}
+            transition={{ duration: 0.25, delay: 0.07 }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -540,9 +540,9 @@ function Hero({ profile, apiBase }) {
         )}
 
         <motion.p
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.22 }}
+          transition={{ duration: 0.28, delay: 0.09 }}
           style={{
             color: 'var(--text-muted)',
             fontSize: '1.02rem',
@@ -556,9 +556,9 @@ function Hero({ profile, apiBase }) {
 
         <motion.div
           className="hero-ctas"
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.28 }}
+          transition={{ duration: 0.28, delay: 0.11 }}
           style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}
         >
           <a href="#contact" className="btn-primary">

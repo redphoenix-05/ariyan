@@ -69,7 +69,7 @@ app.get('/api/portfolio', async (req, res) => {
       Certificate.find().sort({ order: 1, createdAt: -1 }).lean(),
     ]);
     const profile = profileDoc || (await Profile.create({})).toObject();
-    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
     res.json({ profile, education, experience, projects, certificates });
   } catch (err) {
     res.status(500).json({ message: err.message });
