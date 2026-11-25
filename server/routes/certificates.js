@@ -3,21 +3,11 @@ const router = express.Router();
 const Certificate = require('../models/Certificate');
 const { protect } = require('../middleware/auth');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `cert-${Date.now()}${path.extname(file.originalname)}`);
-  },
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
-
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // GET /api/certificates — public
 router.get('/', async (req, res) => {
@@ -29,11 +19,12 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/certificates/upload — admin only
+// POST /api/certificates/upload — admin only, return Base64 data URI for MongoDB storage
 router.post('/upload', protect, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
-    res.json({ image: `/uploads/${req.file.filename}` });
+    const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    res.json({ image: dataUri });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
