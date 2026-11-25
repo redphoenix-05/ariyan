@@ -15,11 +15,39 @@ const app = express();
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan('dev'));
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
+  origin: process.env.CLIENT_URL || true,
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+let dbConnection;
+
+function connectDB() {
+  if (mongoose.connection.readyState >= 1) return Promise.resolve();
+
+  dbConnection ||= mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio')
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => {
+      dbConnection = null;
+      throw err;
+    });
+
+  return dbConnection;
+}
+
+// Health check
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+// Ensure MongoDB connection before API routes in serverless/Vercel Services mode
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -32,20 +60,7 @@ app.use('/api/experience', require('./routes/experience'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/certificates', require('./routes/certificates'));
 
-// Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-
 const PORT = process.env.PORT || 5000;
-let dbConnection;
-
-function connectDB() {
-  if (mongoose.connection.readyState >= 1) return Promise.resolve();
-
-  dbConnection ||= mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio')
-    .then(() => console.log('MongoDB connected'));
-
-  return dbConnection;
-}
 
 if (require.main === module) {
   connectDB()
@@ -58,9 +73,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = async (req, res) => {
-  await connectDB();
-  return app(req, res);
-};
-
-module.exports.app = app;
+module.exports = app;

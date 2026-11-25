@@ -1567,13 +1567,13 @@ export default function Portfolio() {
   }, []);
 
   const siteUrl = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/$/, '');
-  const apiBase = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
   const name = profile?.name || 'Ariyan Aftab';
   const title = profile?.title || 'Full-Stack Developer & ML Enthusiast';
   const description = `${name} portfolio - ${title}. ${profile?.bio?.substring(0, 150) || 'Explore projects, education, experience, certificates, and software engineering work by Ariyan Aftab.'}`;
   const keywords = profile?.seoKeywords || 'Ariyan Aftab, Ariyan Aftab portfolio, Ariyan Aftab developer, KUET CSE, full-stack developer Bangladesh, ML enthusiast, React developer, Node.js developer';
   const imageUrl = profile?.photo
-    ? (profile.photo.startsWith('/uploads') ? `${apiBase}${profile.photo}` : profile.photo)
+    ? (profile.photo.startsWith('/uploads') ? `${apiBase || siteUrl}${profile.photo}` : profile.photo)
     : `${siteUrl}/favicon.svg`;
   const sameAs = [profile?.github, profile?.linkedin, profile?.twitter, profile?.facebook].filter(Boolean);
 

@@ -1,7 +1,16 @@
 {
-  "version": 2,
-  "buildCommand": "npm run install:all && npm run build",
-  "outputDirectory": "client/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "client": {
+      "root": "client",
+      "framework": "vite"
+    },
+    "server": {
+      "root": "server",
+      "framework": "express",
+      "entrypoint": "index.js"
+    }
+  },
   "headers": [
     {
       "source": "/admin(.*)",
@@ -25,20 +34,21 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "/api/index.js"
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "client"
+      }
     }
-  ],
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs22.x"
-    }
-  }
+  ]
 }

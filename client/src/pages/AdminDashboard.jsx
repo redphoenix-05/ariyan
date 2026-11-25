@@ -54,7 +54,7 @@ function ProfileTab({ toast }) {
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [savingPw, setSavingPw] = useState(false);
   const fileRef = useRef(null);
-  const apiBase = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
 
   useEffect(() => { api.get('/profile').then(r => setData(r.data)); }, []);
 
@@ -678,7 +678,7 @@ function CertificatesTab({ toast }) {
   const [form, setForm] = useState({});
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef();
-  const apiBase = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
 
   const load = () => api.get('/certificates').then(r => setItems(r.data));
   useEffect(() => { load(); }, []);
