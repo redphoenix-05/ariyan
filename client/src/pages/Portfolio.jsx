@@ -363,29 +363,16 @@ function Navbar({ profile, activeSection, theme, toggleTheme }) {
   );
 }
 
-// ─── Section Header ──────────────────────────────────────────────────────────
-function SectionHeader({ eyebrow, title, subtitle, align = 'center' }) {
+// ─── Section Header (Clean Editorial — No AI ALL-CAPS Eyebrow Cliché) ───────
+function SectionHeader({ title, subtitle, align = 'left' }) {
   return (
-    <Reveal y={28} style={{ marginBottom: '3.25rem', textAlign: align }}>
-      <p
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.72rem',
-          fontWeight: 500,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: 'var(--accent)',
-          marginBottom: '0.65rem',
-        }}
-      >
-        {eyebrow}
-      </p>
+    <Reveal y={20} style={{ marginBottom: '3rem', textAlign: align }}>
       <h2
         style={{
-          fontSize: 'clamp(1.9rem, 3.8vw, 2.75rem)',
-          fontWeight: 800,
-          letterSpacing: '-0.03em',
-          marginBottom: subtitle ? '0.75rem' : 0,
+          fontSize: 'clamp(2.2rem, 4.5vw, 3.25rem)',
+          fontWeight: 400,
+          letterSpacing: '-0.02em',
+          marginBottom: subtitle ? '0.6rem' : 0,
         }}
       >
         {title}
@@ -394,9 +381,10 @@ function SectionHeader({ eyebrow, title, subtitle, align = 'center' }) {
         <p
           style={{
             color: 'var(--text-muted)',
-            fontSize: '0.98rem',
-            maxWidth: align === 'center' ? '560px' : 'none',
+            fontSize: '0.96rem',
+            maxWidth: align === 'center' ? '560px' : '580px',
             margin: align === 'center' ? '0 auto' : 0,
+            lineHeight: 1.65,
           }}
         >
           {subtitle}
@@ -449,7 +437,6 @@ function Hero({ profile, apiBase }) {
     : null;
 
   const fullTitle = profile?.title || 'Full-Stack Developer & ML Enthusiast';
-  const [leadRole, ...restRole] = fullTitle.split('&');
 
   return (
     <section
@@ -508,10 +495,10 @@ function Hero({ profile, apiBase }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.28, delay: 0.02 }}
           style={{
-            fontSize: 'clamp(2.6rem, 6.5vw, 4.5rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.035em',
-            marginBottom: '0.85rem',
+            fontSize: 'clamp(3rem, 7.5vw, 5.25rem)',
+            fontWeight: 400,
+            letterSpacing: '-0.02em',
+            marginBottom: '0.65rem',
           }}
         >
           {profile?.name || 'Ariyan Aftab'}
@@ -522,16 +509,14 @@ function Hero({ profile, apiBase }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.28, delay: 0.05 }}
           style={{
-            fontSize: 'clamp(1.1rem, 2.4vw, 1.4rem)',
-            fontWeight: 600,
-            marginBottom: '0.9rem',
+            fontSize: 'clamp(1rem, 2.1vw, 1.2rem)',
+            fontWeight: 500,
+            color: 'var(--text-muted)',
+            marginBottom: '0.85rem',
             letterSpacing: '-0.01em',
           }}
         >
-          <span>{leadRole.trim()}</span>
-          {restRole.length > 0 && (
-            <span style={{ color: 'var(--accent)' }}> &amp; {restRole.join('&').trim()}</span>
-          )}
+          {fullTitle}
         </motion.p>
 
         {profile?.location && (
@@ -629,57 +614,42 @@ function AboutSection({ profile }) {
       <div className="container">
         <div className="about-grid" style={quickFacts.length === 0 ? { gridTemplateColumns: '1fr' } : undefined}>
           <Reveal>
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.72rem',
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                color: 'var(--accent)',
-                marginBottom: '0.75rem',
-              }}
-            >
-              About Me
-            </p>
             <h2
               style={{
-                fontSize: 'clamp(1.9rem, 3.6vw, 2.65rem)',
-                fontWeight: 800,
-                letterSpacing: '-0.03em',
+                fontSize: 'clamp(2.2rem, 4.5vw, 3.25rem)',
+                fontWeight: 400,
+                letterSpacing: '-0.02em',
                 marginBottom: '1.5rem',
               }}
             >
-              Turning ideas into{' '}
-              <span style={{ color: 'var(--accent)' }}>engineered reality</span>
+              About me
             </h2>
             {paragraphs.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem', color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.8, maxWidth: '62ch' }}>
                 {paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
             ) : (
-              <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.88rem' }}>
                 Add your bio or About Me text from the Admin Dashboard.
               </p>
             )}
           </Reveal>
 
           {quickFacts.length > 0 && (
-            <Reveal delay={0.12} className="card" style={{ padding: '1.75rem' }}>
+            <Reveal delay={0.08} className="editorial-panel">
               <p
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
                   color: 'var(--text-dim)',
                   marginBottom: '1.25rem',
                 }}
               >
-                Quick Snapshot
+                At a glance
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem' }}>
                 {quickFacts.map((fact, idx) => (
                   <div
                     key={fact._id || `${fact.label}-${idx}`}
@@ -687,13 +657,13 @@ function AboutSection({ profile }) {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'baseline',
-                      gap: '1rem',
-                      paddingBottom: idx < quickFacts.length - 1 ? '1rem' : 0,
+                      gap: '1.25rem',
+                      paddingBottom: idx < quickFacts.length - 1 ? '0.95rem' : 0,
                       borderBottom: idx < quickFacts.length - 1 ? '1px solid var(--border)' : 'none',
                     }}
                   >
-                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{fact.label}</span>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 600, textAlign: 'right' }}>{fact.value}</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{fact.label}</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 500, textAlign: 'right', color: 'var(--text)' }}>{fact.value}</span>
                   </div>
                 ))}
               </div>
@@ -726,32 +696,29 @@ function SkillsSection({ skillCategories, skills }) {
         ) : (
           <>
             {groups.length > 0 && (
-              <div className="skills-grid">
+              <div className="skills-grid" style={{ gap: '2.5rem 3rem' }}>
                 {groups.map((group, idx) => (
-                  <Reveal key={group._id || `${group.title}-${idx}`} delay={idx * 0.08} className="card" style={{ padding: '1.75rem' }}>
-                    <h3 style={{ fontSize: '1.15rem', marginBottom: group.subtitle ? '0.35rem' : '1.1rem' }}>{group.title}</h3>
+                  <Reveal key={group._id || `${group.title}-${idx}`} delay={idx * 0.04} className="editorial-panel">
+                    <h3 style={{ fontSize: '1.08rem', fontWeight: 600, marginBottom: group.subtitle ? '0.3rem' : '1rem' }}>{group.title}</h3>
                     {group.subtitle && (
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>{group.subtitle}</p>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.1rem', lineHeight: 1.55 }}>{group.subtitle}</p>
                     )}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.6rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                       {(group.items || []).map(item => (
-                        <div
+                        <span
                           key={item}
                           style={{
-                            padding: '0.6rem 0.85rem',
-                            borderRadius: '10px',
-                            background: 'var(--surface-2)',
+                            padding: '0.35rem 0.75rem',
+                            borderRadius: '4px',
+                            background: 'var(--surface)',
                             border: '1px solid var(--border)',
-                            fontSize: '0.85rem',
+                            fontSize: '0.84rem',
                             fontWeight: 500,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
+                            color: 'var(--text)',
                           }}
                         >
-                          <span>{item}</span>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)' }} />
-                        </div>
+                          {item}
+                        </span>
                       ))}
                     </div>
                   </Reveal>
@@ -760,13 +727,13 @@ function SkillsSection({ skillCategories, skills }) {
             )}
 
             {extra.length > 0 && (
-              <Reveal delay={0.12} style={{ marginTop: groups.length > 0 ? '2.5rem' : 0, textAlign: 'center' }}>
+              <Reveal delay={0.08} style={{ marginTop: groups.length > 0 ? '3rem' : 0, paddingTop: groups.length > 0 ? '1.75rem' : 0, borderTop: groups.length > 0 ? '1px solid var(--border)' : 'none' }}>
                 {groups.length > 0 && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-dim)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                  <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-dim)', marginBottom: '0.85rem' }}>
                     Also familiar with
                   </p>
                 )}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center', maxWidth: '760px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
                   {extra.map(s => (
                     <span key={s} className="tag">{s}</span>
                   ))}
@@ -801,9 +768,9 @@ function ExperienceSection({ items }) {
             No experience entries added yet.
           </p>
         ) : (
-          <div style={{ maxWidth: '860px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {items.map((exp, idx) => (
-              <Reveal key={exp._id} delay={idx * 0.08} className="card" style={{ padding: '1.75rem' }}>
+              <Reveal key={exp._id} delay={idx * 0.05} style={{ padding: '1.75rem 0', borderTop: '1px solid var(--border)', borderBottom: idx === items.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div
@@ -913,10 +880,10 @@ function ProjectsSection({ items, githubUrl }) {
                 </div>
 
                 <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '0.6rem' }}>
-                    Featured Project · {featured.category}
+                  <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--accent)', marginBottom: '0.5rem' }}>
+                    Featured · {featured.category}
                   </span>
-                  <h3 style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>{featured.title}</h3>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', fontWeight: 400, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>{featured.title}</h3>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.94rem', lineHeight: 1.75, marginBottom: '1.25rem' }}>
                     {featured.description}
                   </p>
@@ -1532,7 +1499,7 @@ function ContactSection({ profile }) {
           subtitle="Have a project, collaboration, or research idea in mind? Send a message directly."
         />
 
-        <div className="contact-grid" style={{ maxWidth: '960px', margin: '0 auto' }}>
+        <div className="contact-grid">
           <Reveal>
             <form onSubmit={handleSubmit} className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -1566,12 +1533,12 @@ function ContactSection({ profile }) {
             </form>
           </Reveal>
 
-          <Reveal delay={0.12} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="card" style={{ padding: '1.75rem' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '1rem' }}>
-                Get in Touch
+          <Reveal delay={0.08} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div className="editorial-panel">
+              <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-dim)', marginBottom: '0.9rem' }}>
+                Direct contact
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', fontSize: '0.92rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.92rem' }}>
                 {profile?.email && (
                   <a href={`mailto:${profile.email}`} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: 'var(--text)' }}>
                     <Mail size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
@@ -1585,9 +1552,9 @@ function ContactSection({ profile }) {
               </div>
             </div>
 
-            <div className="card" style={{ padding: '1.75rem' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '1rem' }}>
-                Follow Me
+            <div className="editorial-panel">
+              <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-dim)', marginBottom: '0.9rem' }}>
+                Elsewhere
               </p>
               <SocialLinks profile={profile} />
             </div>
