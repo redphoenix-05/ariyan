@@ -923,28 +923,19 @@ function MessagesTab({ toast, onUnreadChange }) {
                 borderRadius: 'var(--radius)',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.98rem' }}>{msg.subject}</span>
-                    {!msg.read && (
-                      <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--accent)', background: 'var(--accent-soft)', border: '1px solid var(--accent-border)', padding: '0.1rem 0.5rem', borderRadius: '999px' }}>
-                        NEW
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                    <strong style={{ color: 'var(--text)' }}>{msg.name}</strong> ·{' '}
-                    <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`} style={{ color: 'var(--accent)' }}>
-                      {msg.email}
-                    </a>
-                  </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.85rem', paddingBottom: '0.65rem', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+                  {!msg.read && (
+                    <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--accent)', background: 'var(--accent-soft)', border: '1px solid var(--accent-border)', padding: '0.1rem 0.5rem', borderRadius: '999px' }}>
+                      NEW
+                    </span>
+                  )}
+                  <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                    {new Date(msg.createdAt).toLocaleString()}
+                  </span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginRight: '0.35rem' }}>
-                    {new Date(msg.createdAt).toLocaleString()}
-                  </span>
                   <button
                     onClick={() => toggleRead(msg)}
                     title={msg.read ? 'Mark as unread' : 'Mark as read'}
@@ -962,9 +953,26 @@ function MessagesTab({ toast, onUnreadChange }) {
                 </div>
               </div>
 
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.7, whiteSpace: 'pre-wrap', paddingTop: '0.6rem', borderTop: '1px solid var(--border)' }}>
-                {msg.message}
-              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.9rem', lineHeight: 1.65 }}>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.5rem' }}>Name:</span>
+                  <strong style={{ color: 'var(--text)' }}>{msg.name}</strong>
+                </div>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.5rem' }}>Email:</span>
+                  <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`} style={{ color: 'var(--accent)', wordBreak: 'break-word' }}>
+                    {msg.email}
+                  </a>
+                </div>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.5rem' }}>Subject:</span>
+                  <span style={{ color: 'var(--text)', fontWeight: 600 }}>{msg.subject}</span>
+                </div>
+                <div style={{ marginTop: '0.2rem' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '0.5rem' }}>Message:</span>
+                  <span style={{ color: 'var(--text-muted)', whiteSpace: 'pre-wrap' }}>{msg.message}</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>
