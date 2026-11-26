@@ -84,6 +84,7 @@ app.use('/api/experience', require('./routes/experience'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/certificates', require('./routes/certificates'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 const PORT = process.env.PORT || 5000;
 

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import {
   User, GraduationCap, Briefcase, FolderGit2, Award, Lock, Mail, Check, Menu,
+  LayoutDashboard, Users, TrendingUp, ArrowRight,
   LogOut, Upload, Plus, Pencil, Trash2, Save, X, ChevronRight, ExternalLink, Eye
 } from 'lucide-react';
 
@@ -981,8 +982,208 @@ function MessagesTab({ toast, onUnreadChange }) {
   );
 }
 
+// ─── Overview Tab ─────────────────────────────────────────────────────────────
+function OverviewTab({ onNavigateTab, onUnreadChange }) {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/analytics/overview')
+      .then(r => {
+        setStats(r.data);
+        onUnreadChange?.(r.data?.messages?.unread || 0);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+        Loading overview...
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div style={{ padding: '2rem', color: '#f87171', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+        Could not load overview metrics.
+      </div>
+    );
+  }
+
+  const maxDayCount = Math.max(1, ...(stats.last7Days || []).map(d => d.count));
+
+  const kpis = [
+    {
+      label: 'Visits Today',
+      value: stats.today.visits,
+      sub: `${stats.today.unique} unique visitor${stats.today.unique !== 1 ? 's' : ''}`,
+      icon: Users,
+      accent: true,
+    },
+    {
+      label: 'All-Time Visits',
+      value: stats.totalVisits,
+      sub: 'Total tracked sessions',
+      icon: TrendingUp,
+    },
+    {
+      label: 'New Messages',
+      value: stats.messages.unread,
+      sub: `${stats.messages.total} total in inbox`,
+      icon: Mail,
+      onClick: () => onNavigateTab('messages'),
+      highlight: stats.messages.unread > 0,
+    },
+    {
+      label: 'Published Content',
+      value: stats.counts.projects + stats.counts.certificates + stats.counts.education + stats.counts.experience,
+      sub: `${stats.counts.projects} proj · ${stats.counts.certificates} cert · ${stats.counts.education} edu · ${stats.counts.experience} exp`,
+      icon: FolderGit2,
+    },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top 4 KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 195px), 1fr))', gap: '1rem' }}>
+        {kpis.map(card => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.label}
+              onClick={card.onClick}
+              style={{
+                padding: '1.25rem',
+                background: 'var(--surface)',
+                border: `1px solid ${card.highlight ? 'var(--accent-border)' : 'var(--border)'}`,
+                borderRadius: 'var(--radius-lg)',
+                cursor: card.onClick ? 'pointer' : 'default',
+                transition: 'border-color 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-dim)' }}>
+                  {card.label}
+                </span>
+                <Icon size={16} style={{ color: card.highlight || card.accent ? 'var(--accent)' : 'var(--text-dim)' }} />
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', fontWeight: 800, lineHeight: 1.1, color: card.highlight ? 'var(--accent)' : 'var(--text)' }}>
+                {card.value}
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+                {card.sub}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Last 7 Days Traffic Bar Chart */}
+      <div style={{ padding: '1.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Last 7 Days Visits</h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>Daily portfolio traffic (BDT / UTC+6)</p>
+          </div>
+          <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+            Today: {stats.today.date}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '0.6rem', alignItems: 'end', height: '140px', paddingTop: '1rem' }}>
+          {(stats.last7Days || []).map((day, idx) => {
+            const pct = Math.max(6, Math.round((day.count / maxDayCount) * 100));
+            const isToday = idx === stats.last7Days.length - 1;
+            return (
+              <div key={day.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: isToday ? 'var(--accent)' : 'var(--text-muted)', fontWeight: isToday ? 700 : 400 }}>
+                  {day.count}
+                </span>
+                <div style={{ width: '100%', maxWidth: '42px', flex: 1, display: 'flex', alignItems: 'flex-end' }}>
+                  <div
+                    title={`${day.date}: ${day.count} visits (${day.unique} unique)`}
+                    style={{
+                      width: '100%',
+                      height: `${day.count === 0 ? 4 : pct}%`,
+                      borderRadius: '6px 6px 2px 2px',
+                      background: isToday ? 'var(--accent)' : 'var(--surface-2)',
+                      border: `1px solid ${isToday ? 'var(--accent)' : 'var(--border)'}`,
+                      transition: 'height 0.3s ease',
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: isToday ? 'var(--text)' : 'var(--text-dim)' }}>
+                  {day.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent Messages Preview */}
+      <div style={{ padding: '1.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Recent Messages</h3>
+          <button
+            type="button"
+            onClick={() => onNavigateTab('messages')}
+            style={{ background: 'transparent', border: 'none', color: 'var(--accent)', fontSize: '0.82rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}
+          >
+            View All Messages <ArrowRight size={14} />
+          </button>
+        </div>
+
+        {!stats.messages.recent?.length ? (
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+            No messages received yet.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {stats.messages.recent.map(msg => (
+              <div
+                key={msg._id}
+                onClick={() => onNavigateTab('messages')}
+                style={{
+                  padding: '0.9rem 1rem',
+                  background: 'var(--surface-2)',
+                  border: `1px solid ${msg.read ? 'var(--border)' : 'var(--accent-border)'}`,
+                  borderRadius: 'var(--radius)',
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {!msg.read && (
+                      <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--accent)', background: 'var(--accent-soft)', border: '1px solid var(--accent-border)', padding: '0.05rem 0.45rem', borderRadius: '999px' }}>
+                        NEW
+                      </span>
+                    )}
+                    <strong style={{ fontSize: '0.88rem' }}>{msg.name}</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>— {msg.subject}</span>
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                    {new Date(msg.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {msg.message}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 const TABS = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'education', label: 'Education', icon: GraduationCap },
   { id: 'experience', label: 'Experience', icon: Briefcase },
@@ -994,7 +1195,7 @@ const TABS = [
 export default function AdminDashboard() {
   const { admin, logout } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState('profile');
+  const [tab, setTab] = useState('overview');
   const [toast, setToast] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -1262,6 +1463,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Tab content */}
+          {tab === 'overview' && <OverviewTab onNavigateTab={setTab} onUnreadChange={setUnreadCount} />}
           {tab === 'profile' && <ProfileTab toast={showToast} />}
           {tab === 'education' && <EducationTab toast={showToast} />}
           {tab === 'experience' && <ExperienceTab toast={showToast} />}

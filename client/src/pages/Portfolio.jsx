@@ -1753,6 +1753,21 @@ export default function Portfolio() {
         // Ignore storage quota errors
       }
     }).catch(() => {});
+
+    // Record anonymous visit once per browser session (non-blocking)
+    try {
+      if (!sessionStorage.getItem('portfolio_visit_logged')) {
+        let visitorId = localStorage.getItem('portfolio_vid');
+        if (!visitorId) {
+          visitorId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+          localStorage.setItem('portfolio_vid', visitorId);
+        }
+        sessionStorage.setItem('portfolio_visit_logged', '1');
+        api.post('/analytics/visit', { visitorId }).catch(() => {});
+      }
+    } catch {
+      // Ignore storage errors in private browsing
+    }
   }, []);
 
   useEffect(() => {
