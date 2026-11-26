@@ -157,13 +157,27 @@ function Navbar({ profile, activeSection, theme, toggleTheme }) {
           <a
             href="#home"
             style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.55rem',
               fontFamily: 'var(--font-display)',
               fontWeight: 800,
               fontSize: '1.2rem',
               letterSpacing: '-0.03em',
             }}
           >
-            {brand}
+            <img
+              src="/logo.png"
+              alt={brand}
+              style={{
+                height: '22px',
+                width: 'auto',
+                display: 'block',
+                filter: theme === 'light' ? 'invert(1)' : 'none',
+                transition: 'filter 0.25s ease',
+              }}
+            />
+            <span>{brand}</span>
           </a>
 
           <nav
@@ -1766,7 +1780,7 @@ export default function Portfolio() {
   const keywords = profile?.seoKeywords || 'Ariyan Aftab, Ariyan Aftab portfolio, Ariyan Aftab developer, KUET CSE, full-stack developer Bangladesh, ML enthusiast, React developer, Node.js developer';
   const imageUrl = profile?.photo
     ? (profile.photo.startsWith('/uploads') ? `${apiBase || siteUrl}${profile.photo}` : profile.photo)
-    : `${siteUrl}/favicon.svg`;
+    : `${siteUrl}/favicon.png`;
   const sameAs = [profile?.github, profile?.linkedin, profile?.twitter, profile?.facebook].filter(Boolean);
 
   return (
