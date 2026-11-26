@@ -902,9 +902,9 @@ function ProjectsSection({ items, githubUrl }) {
           <>
             {featured && (
               <Reveal className="featured-project-card">
-                <div style={{ minHeight: '260px', background: 'var(--bg-3)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <div style={{ aspectRatio: '16 / 10', width: '100%', background: 'var(--bg-3)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: featured.thumbnail ? '0.6rem' : 0 }}>
                   {featured.thumbnail ? (
-                    <img src={featured.thumbnail} alt={featured.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={featured.thumbnail} alt={featured.title} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', borderRadius: '6px' }} />
                   ) : (
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '3.25rem', fontWeight: 800, color: 'var(--border-strong)', letterSpacing: '-0.04em' }}>
                       {featured.title}
@@ -945,9 +945,9 @@ function ProjectsSection({ items, githubUrl }) {
               <div className="projects-grid">
                 {rest.map((proj, idx) => (
                   <Reveal key={proj._id} delay={idx * 0.08} className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ height: '165px', background: 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ aspectRatio: '16 / 10', width: '100%', background: 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderBottom: '1px solid var(--border)', padding: proj.thumbnail ? '0.45rem' : 0 }}>
                       {proj.thumbnail ? (
-                        <img src={proj.thumbnail} alt={proj.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={proj.thumbnail} alt={proj.title} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', borderRadius: '6px' }} />
                       ) : (
                         <span style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: 'var(--border-strong)' }}>
                           {proj.title[0]}

@@ -627,8 +627,8 @@ function ProjectsTab({ toast }) {
         {items.map(item => (
           <div key={item._id} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {item.thumbnail && (
-              <div style={{ height: '130px', background: 'var(--bg-3)', borderBottom: '1px solid var(--border)', overflow: 'hidden' }}>
-                <img src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <div style={{ aspectRatio: '16 / 10', width: '100%', background: 'var(--bg-3)', borderBottom: '1px solid var(--border)', overflow: 'hidden', padding: '0.35rem' }}>
+                <img src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', borderRadius: '4px' }} />
               </div>
             )}
             <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
