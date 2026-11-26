@@ -112,7 +112,7 @@ function Reveal({ children, delay = 0, y = 22, className, style }) {
 }
 
 // ─── Navbar (Desktop Top Bar + Mobile Slide-Out Side Drawer) ─────────────────
-function Navbar({ profile, activeSection, theme, toggleTheme }) {
+function Navbar({ profile, navItems, activeSection, theme, toggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -185,7 +185,7 @@ function Navbar({ profile, activeSection, theme, toggleTheme }) {
             aria-label="Primary Navigation"
             style={{ display: 'flex', alignItems: 'center', gap: '1.65rem', fontSize: '0.875rem' }}
           >
-            {NAV_ITEMS.map(item => {
+            {navItems.map(item => {
               const isActive = activeSection === item.id;
               return (
                 <a
@@ -314,7 +314,7 @@ function Navbar({ profile, activeSection, theme, toggleTheme }) {
                 </div>
 
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  {NAV_ITEMS.map((item, idx) => {
+                  {navItems.map((item, idx) => {
                     const isActive = activeSection === item.id;
                     return (
                       <motion.a
@@ -512,32 +512,12 @@ function Hero({ profile, apiBase }) {
             fontSize: 'clamp(1rem, 2.1vw, 1.2rem)',
             fontWeight: 500,
             color: 'var(--text-muted)',
-            marginBottom: '0.85rem',
+            marginBottom: '1.35rem',
             letterSpacing: '-0.01em',
           }}
         >
           {fullTitle}
         </motion.p>
-
-        {profile?.location && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.25, delay: 0.07 }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: 'var(--text-muted)',
-              fontSize: '0.88rem',
-              fontFamily: 'var(--font-mono)',
-              marginBottom: '1.5rem',
-            }}
-          >
-            <MapPin size={14} style={{ color: 'var(--accent)' }} />
-            {profile.location}
-          </motion.div>
-        )}
 
         <motion.p
           initial={{ opacity: 0, y: 10 }}
@@ -606,8 +586,9 @@ function Hero({ profile, apiBase }) {
 // ─── 2. About Me (100% Admin-Controlled) ─────────────────────────────────────
 function AboutSection({ profile }) {
   const quickFacts = (profile?.quickFacts || []).filter(f => f.label && f.value);
-  const rawAbout = (profile?.aboutText || profile?.bio || '').trim();
+  const rawAbout = (profile?.aboutText || '').trim();
   const paragraphs = rawAbout ? rawAbout.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean) : [];
+  if (!paragraphs.length && !quickFacts.length) return null;
 
   return (
     <section id="about" className="section-block section-block-alt">
@@ -951,14 +932,6 @@ function ProjectsSection({ items, githubUrl }) {
               </div>
             )}
           </>
-        )}
-
-        {githubUrl && (
-          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-            <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost">
-              <GithubIcon /> View more on GitHub
-            </a>
-          </div>
         )}
       </div>
     </section>
@@ -1551,13 +1524,6 @@ function ContactSection({ profile }) {
                 </div>
               </div>
             </div>
-
-            <div className="editorial-panel">
-              <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-dim)', marginBottom: '0.9rem' }}>
-                Elsewhere
-              </p>
-              <SocialLinks profile={profile} />
-            </div>
           </Reveal>
         </div>
       </div>
@@ -1565,115 +1531,55 @@ function ContactSection({ profile }) {
   );
 }
 
-// ─── 9. Updated Footer (3-Column + Divider + Bottom Bar) ─────────────────────
+// ─── 9. Clean Minimal Footer (Zero Repetition) ───────────────────────────────
 function Footer({ profile }) {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  const quickLinks = [
-    { id: 'about', label: 'About' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'experience', label: 'Experience' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'achievements', label: 'Achievements' },
-    { id: 'education', label: 'Education' },
-    { id: 'contact', label: 'Contact' },
-  ];
 
   return (
-    <footer style={{ position: 'relative', zIndex: 1, background: 'var(--bg-2)', borderTop: '1px solid var(--border)', paddingTop: '4.5rem', paddingBottom: '2.25rem' }}>
-      <div className="container">
-        <div className="footer-grid" style={{ marginBottom: '3rem' }}>
-          {/* Column 1: Brand & Bio */}
-          <div>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.75rem' }}>
-              {profile?.name || 'Ariyan Aftab'}
-              <span style={{ color: 'var(--accent)' }}>.</span>
-            </h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.75, maxWidth: '360px', marginBottom: '1.25rem' }}>
-              {profile?.bio
-                ? `${profile.bio.slice(0, 145)}${profile.bio.length > 145 ? '...' : ''}`
-                : 'CSE undergraduate at KUET crafting full-stack web apps and exploring machine learning.'}
-            </p>
-            <SocialLinks profile={profile} size="sm" />
-          </div>
+    <footer style={{ position: 'relative', zIndex: 1, background: 'var(--bg-2)', borderTop: '1px solid var(--border)', padding: '2rem 0' }}>
+      <div
+        className="container"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          fontSize: '0.84rem',
+          color: 'var(--text-dim)',
+        }}
+      >
+        <span>© {new Date().getFullYear()} {profile?.name || 'Ariyan Aftab'}</span>
 
-          {/* Column 2: Quick Links */}
-          <div>
-            <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '1rem' }}>
-              Quick Links
-            </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.55rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              {quickLinks.map(link => (
-                <li key={link.id}>
-                  <a href={`#${link.id}`} style={{ transition: 'color 0.2s ease' }}>
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Get in Touch */}
-          <div>
-            <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '1rem' }}>
-              Get in Touch
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              {profile?.email && (
-                <a href={`mailto:${profile.email}`} style={{ color: 'var(--text)', wordBreak: 'break-word' }}>
-                  {profile.email}
-                </a>
-              )}
-              <span>{profile?.location || 'Khulna, Bangladesh'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div
+        <button
+          type="button"
+          onClick={scrollToTop}
           style={{
-            paddingTop: '1.5rem',
-            borderTop: '1px solid var(--border)',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
+            gap: '0.5rem',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-muted)',
             fontSize: '0.84rem',
-            color: 'var(--text-dim)',
           }}
         >
-          <span>© {new Date().getFullYear()} {profile?.name || 'Ariyan Aftab'}. All rights reserved.</span>
-
-          <button
-            type="button"
-            onClick={scrollToTop}
+          <span>Back to top</span>
+          <span
             style={{
+              width: '30px',
+              height: '30px',
+              borderRadius: '6px',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-muted)',
-              fontSize: '0.84rem',
+              justifyContent: 'center',
             }}
           >
-            <span>Back to top</span>
-            <span
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--surface)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <ArrowUp size={14} />
-            </span>
-          </button>
-        </div>
+            <ArrowUp size={14} />
+          </span>
+        </button>
       </div>
     </footer>
   );
@@ -1737,8 +1643,20 @@ export default function Portfolio() {
     }
   }, []);
 
+  const hasAbout = Boolean((profile?.aboutText || '').trim() || (profile?.quickFacts || []).some(f => f.label && f.value));
+  const hasSkills = Boolean((profile?.skillCategories || []).some(g => g.title || g.items?.length) || (profile?.skills || []).filter(Boolean).length);
+  const visibleNavItems = NAV_ITEMS.filter(item => {
+    if (item.id === 'about') return hasAbout;
+    if (item.id === 'skills') return hasSkills;
+    if (item.id === 'experience') return experience.length > 0;
+    if (item.id === 'projects') return projects.length > 0;
+    if (item.id === 'achievements') return certificates.length > 0;
+    if (item.id === 'education') return education.length > 0;
+    return true;
+  });
+
   useEffect(() => {
-    const ids = NAV_ITEMS.map(n => n.id);
+    const ids = visibleNavItems.map(n => n.id);
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -1752,7 +1670,7 @@ export default function Portfolio() {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [hasAbout, hasSkills, experience.length, projects.length, certificates.length, education.length]);
 
   const siteUrl = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/$/, '');
   const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
@@ -1802,6 +1720,7 @@ export default function Portfolio() {
         <Starfield visible={theme === 'dark'} />
         <Navbar
           profile={profile}
+          navItems={visibleNavItems}
           activeSection={activeSection}
           theme={theme}
           toggleTheme={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
@@ -1809,12 +1728,12 @@ export default function Portfolio() {
 
         <main style={{ position: 'relative', zIndex: 1 }}>
           <Hero profile={profile} apiBase={apiBase} />
-          <AboutSection profile={profile} />
-          <SkillsSection skillCategories={profile?.skillCategories} skills={profile?.skills} />
-          <ExperienceSection items={experience} />
-          <ProjectsSection items={projects} githubUrl={profile?.github} />
-          <CertificatesSlider items={certificates} apiBase={apiBase} />
-          <EducationSection items={education} />
+          {hasAbout && <AboutSection profile={profile} />}
+          {hasSkills && <SkillsSection skillCategories={profile?.skillCategories} skills={profile?.skills} />}
+          {experience.length > 0 && <ExperienceSection items={experience} />}
+          {projects.length > 0 && <ProjectsSection items={projects} />}
+          {certificates.length > 0 && <CertificatesSlider items={certificates} apiBase={apiBase} />}
+          {education.length > 0 && <EducationSection items={education} />}
           <ContactSection profile={profile} />
         </main>
 
