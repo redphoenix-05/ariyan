@@ -561,21 +561,44 @@ function ProjectsTab({ toast }) {
   const [items, setItems] = useState([]);
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
 
   const load = () => api.get('/projects').then(r => setItems(r.data));
   useEffect(() => { load(); }, []);
 
   const openAdd = () => {
-    setForm({ title: '', description: '', longDescription: '', thumbnail: '', liveUrl: '', githubUrl: '', technologies: [], category: 'Web', featured: false, status: 'completed', order: 0 });
+    setForm({ title: '', description: '', longDescription: '', thumbnail: '', liveUrl: '', githubUrl: '', technologies: [], category: 'Web', featured: false, status: 'completed', order: items.length });
     setModal('add');
   };
   const openEdit = (item) => { setForm({ ...item, technologies: item.technologies || [] }); setModal(item); };
   const close = () => setModal(null);
 
+  const uploadThumbnail = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('thumbnail', file);
+      const res = await api.post('/projects/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setForm(p => ({ ...p, thumbnail: res.data.thumbnail }));
+      toast('Project preview image uploaded!', 'success');
+    } catch {
+      toast('Image upload failed', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const save = async () => {
     try {
-      if (modal === 'add') await api.post('/projects', form);
-      else await api.put(`/projects/${form._id}`, form);
+      const payload = {
+        ...form,
+        technologies: (form.technologies || []).map(s => s.trim()).filter(Boolean),
+      };
+      if (modal === 'add') await api.post('/projects', payload);
+      else await api.put(`/projects/${form._id}`, payload);
       await load();
       close();
       toast(modal === 'add' ? 'Project added!' : 'Project updated!', 'success');
@@ -602,20 +625,27 @@ function ProjectsTab({ toast }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
         {items.map(item => (
-          <div key={item._id} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-                  <p style={{ fontWeight: 600 }}>{item.title}</p>
-                  {item.featured && <span style={{ background: 'rgba(246,201,14,0.1)', border: '1px solid rgba(246,201,14,0.3)', color: 'var(--gold)', borderRadius: '100px', padding: '0.1rem 0.5rem', fontSize: '0.6rem', fontFamily: 'var(--font-mono)' }}>FEATURED</span>}
-                </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{item.description.substring(0, 80)}{item.description.length > 80 ? '...' : ''}</p>
+          <div key={item._id} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            {item.thumbnail && (
+              <div style={{ height: '130px', background: 'var(--bg-3)', borderBottom: '1px solid var(--border)', overflow: 'hidden' }}>
+                <img src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </div>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', justifyContent: 'flex-end' }}>
-              {item.liveUrl && <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center' }}><ExternalLink size={13} /></a>}
-              <button onClick={() => openEdit(item)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.35rem', color: 'var(--text-muted)', cursor: 'pointer' }}><Pencil size={13} /></button>
-              <button onClick={() => del(item._id)} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '6px', padding: '0.35rem', color: '#f87171', cursor: 'pointer' }}><Trash2 size={13} /></button>
+            )}
+            <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                    <p style={{ fontWeight: 600 }}>{item.title}</p>
+                    {item.featured && <span style={{ background: 'rgba(246,201,14,0.1)', border: '1px solid rgba(246,201,14,0.3)', color: 'var(--gold)', borderRadius: '100px', padding: '0.1rem 0.5rem', fontSize: '0.6rem', fontFamily: 'var(--font-mono)' }}>FEATURED</span>}
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{item.description.substring(0, 80)}{item.description.length > 80 ? '...' : ''}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', justifyContent: 'flex-end' }}>
+                {item.liveUrl && <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center' }}><ExternalLink size={13} /></a>}
+                <button onClick={() => openEdit(item)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.35rem', color: 'var(--text-muted)', cursor: 'pointer' }}><Pencil size={13} /></button>
+                <button onClick={() => del(item._id)} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '6px', padding: '0.35rem', color: '#f87171', cursor: 'pointer' }}><Trash2 size={13} /></button>
+              </div>
             </div>
           </div>
         ))}
@@ -624,6 +654,25 @@ function ProjectsTab({ toast }) {
 
       {modal && (
         <Modal title={modal === 'add' ? 'Add Project' : 'Edit Project'} onClose={close}>
+          <FormRow label="Project Preview Image">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+              {form.thumbnail && (
+                <img src={form.thumbnail} alt="Preview" style={{ width: '112px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border)' }} />
+              )}
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <input ref={fileRef} type="file" accept="image/*" onChange={uploadThumbnail} style={{ display: 'none' }} />
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="btn-ghost" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+                  <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Image (Max 10MB)'}
+                </button>
+                {form.thumbnail && (
+                  <button type="button" onClick={() => setForm(p => ({ ...p, thumbnail: '' }))} style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '999px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+            {f('thumbnail', 'text', 'Or paste image URL (https://...)')}
+          </FormRow>
           <FormRow label="Title">{f('title', 'text', 'My Awesome Project')}</FormRow>
           <FormRow label="Short Description">
             <textarea className="admin-input" rows={2} value={form.description || ''} placeholder="What does this project do?"
@@ -633,14 +682,13 @@ function ProjectsTab({ toast }) {
             <textarea className="admin-input" rows={3} value={form.longDescription || ''} placeholder="More details..."
               onChange={e => setForm(p => ({ ...p, longDescription: e.target.value }))} style={{ resize: 'vertical' }} />
           </FormRow>
-          <FormRow label="Thumbnail URL (optional)">{f('thumbnail', 'url', 'https://...')}</FormRow>
           <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <FormRow label="Live URL (leave blank if none)">{f('liveUrl', 'url', 'https://...')}</FormRow>
             <FormRow label="GitHub URL">{f('githubUrl', 'url', 'https://github.com/...')}</FormRow>
           </div>
           <FormRow label="Technologies (comma separated)">
             <input type="text" className="admin-input" value={(form.technologies || []).join(', ')}
-              onChange={e => setForm(p => ({ ...p, technologies: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
+              onChange={e => setForm(p => ({ ...p, technologies: e.target.value.split(',') }))}
               placeholder="React, Node.js, MongoDB..." />
           </FormRow>
           <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
