@@ -299,9 +299,11 @@ function ProfileTab({ toast }) {
         </div>
       </div>
 
-      <button onClick={save} className="btn-primary" style={{ marginTop: '0.5rem' }} disabled={saving}>
-        <Save size={14} /> {saving ? 'Saving...' : 'Save Profile'}
-      </button>
+      <div className="admin-submit-row" style={{ marginTop: '0.5rem' }}>
+        <button onClick={save} className="btn-primary" disabled={saving}>
+          <Save size={14} /> {saving ? 'Saving...' : 'Save Profile'}
+        </button>
+      </div>
 
       {/* Change Admin Password */}
       <form
@@ -350,9 +352,11 @@ function ProfileTab({ toast }) {
             />
           </FormRow>
         </div>
-        <button type="submit" className="btn-ghost" disabled={savingPw}>
-          <Lock size={14} /> {savingPw ? 'Updating...' : 'Update Password'}
-        </button>
+        <div className="admin-submit-row">
+          <button type="submit" className="btn-ghost" disabled={savingPw}>
+            <Lock size={14} /> {savingPw ? 'Updating...' : 'Update Password'}
+          </button>
+        </div>
       </form>
     </div>
   );

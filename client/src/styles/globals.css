@@ -403,6 +403,11 @@ input, textarea, select {
     padding: 1.25rem 1rem !important;
   }
 
+  .admin-submit-row {
+    display: flex;
+    justify-content: center;
+  }
+
   .section-block {
     padding: 4.25rem 0;
   }
